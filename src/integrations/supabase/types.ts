@@ -283,6 +283,68 @@ export type Database = {
         }
         Relationships: []
       }
+      usuarios: {
+        Row: {
+          ativo: boolean
+          avatar: string | null
+          colaborador_id: string | null
+          created_at: string
+          id: string
+          login: string
+          nome: string
+          onboarding_concluido: boolean
+          permissoes: Json | null
+          permite_criar_assistente: boolean
+          role: string
+          senha: string
+          tema_config: Json | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          avatar?: string | null
+          colaborador_id?: string | null
+          created_at?: string
+          id?: string
+          login: string
+          nome: string
+          onboarding_concluido?: boolean
+          permissoes?: Json | null
+          permite_criar_assistente?: boolean
+          role?: string
+          senha: string
+          tema_config?: Json | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          avatar?: string | null
+          colaborador_id?: string | null
+          created_at?: string
+          id?: string
+          login?: string
+          nome?: string
+          onboarding_concluido?: boolean
+          permissoes?: Json | null
+          permite_criar_assistente?: boolean
+          role?: string
+          senha?: string
+          tema_config?: Json | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuarios_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
