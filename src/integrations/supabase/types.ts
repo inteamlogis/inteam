@@ -14,16 +14,301 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      estoque: {
+        Row: {
+          created_at: string
+          id: string
+          imagem_url: string | null
+          marketplace: string | null
+          nome: string
+          preco_custo: number
+          preco_venda: number
+          quantidade: number
+          sku: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          imagem_url?: string | null
+          marketplace?: string | null
+          nome: string
+          preco_custo?: number
+          preco_venda?: number
+          quantidade?: number
+          sku?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          imagem_url?: string | null
+          marketplace?: string | null
+          nome?: string
+          preco_custo?: number
+          preco_venda?: number
+          quantidade?: number
+          sku?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      livro_caixa: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          data: string
+          descricao: string
+          id: string
+          tipo: Database["public"]["Enums"]["livro_caixa_tipo"]
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          data?: string
+          descricao: string
+          id?: string
+          tipo: Database["public"]["Enums"]["livro_caixa_tipo"]
+          updated_at?: string
+          valor: number
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          data?: string
+          descricao?: string
+          id?: string
+          tipo?: Database["public"]["Enums"]["livro_caixa_tipo"]
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      marketplaces: {
+        Row: {
+          api_token: string | null
+          conectado: boolean
+          created_at: string
+          id: string
+          nome: string
+          tipo: Database["public"]["Enums"]["marketplace_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          api_token?: string | null
+          conectado?: boolean
+          created_at?: string
+          id?: string
+          nome: string
+          tipo?: Database["public"]["Enums"]["marketplace_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          api_token?: string | null
+          conectado?: boolean
+          created_at?: string
+          id?: string
+          nome?: string
+          tipo?: Database["public"]["Enums"]["marketplace_tipo"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mensagens_pedido: {
+        Row: {
+          conteudo: string
+          created_at: string
+          id: string
+          pedido_id: string
+          remetente_id: string | null
+        }
+        Insert: {
+          conteudo: string
+          created_at?: string
+          id?: string
+          pedido_id: string
+          remetente_id?: string | null
+        }
+        Update: {
+          conteudo?: string
+          created_at?: string
+          id?: string
+          pedido_id?: string
+          remetente_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensagens_pedido_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensagens_pedido_remetente_id_fkey"
+            columns: ["remetente_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pedidos: {
+        Row: {
+          cliente: string
+          created_at: string
+          id: string
+          marketplace_id: string | null
+          numero: string
+          observacoes: string | null
+          rastreio: string | null
+          responsavel_id: string | null
+          status: Database["public"]["Enums"]["pedido_status"]
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          cliente: string
+          created_at?: string
+          id?: string
+          marketplace_id?: string | null
+          numero: string
+          observacoes?: string | null
+          rastreio?: string | null
+          responsavel_id?: string | null
+          status?: Database["public"]["Enums"]["pedido_status"]
+          updated_at?: string
+          valor?: number
+        }
+        Update: {
+          cliente?: string
+          created_at?: string
+          id?: string
+          marketplace_id?: string | null
+          numero?: string
+          observacoes?: string | null
+          rastreio?: string | null
+          responsavel_id?: string | null
+          status?: Database["public"]["Enums"]["pedido_status"]
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_marketplace_id_fkey"
+            columns: ["marketplace_id"]
+            isOneToOne: false
+            referencedRelation: "marketplaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pedidos_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          ativo: boolean
+          colaborador_id: string | null
+          created_at: string
+          id: string
+          login: string
+          nome: string
+          permissoes: Json | null
+          permite_criar_assistente: boolean
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+          whatsapp: string
+        }
+        Insert: {
+          ativo?: boolean
+          colaborador_id?: string | null
+          created_at?: string
+          id?: string
+          login: string
+          nome: string
+          permissoes?: Json | null
+          permite_criar_assistente?: boolean
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+          whatsapp?: string
+        }
+        Update: {
+          ativo?: boolean
+          colaborador_id?: string | null
+          created_at?: string
+          id?: string
+          login?: string
+          nome?: string
+          permissoes?: Json | null
+          permite_criar_assistente?: boolean
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_colaborador_id_fkey"
+            columns: ["colaborador_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_colaborador_id: { Args: never; Returns: string }
+      get_profile_id: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "colaborador" | "assistente"
+      livro_caixa_tipo: "entrada" | "saida"
+      marketplace_tipo: "mercadolivre" | "shopee" | "outro"
+      pedido_status:
+        | "novo"
+        | "em_analise"
+        | "aprovado"
+        | "enviado"
+        | "entregue"
+        | "cancelado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +435,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "colaborador", "assistente"],
+      livro_caixa_tipo: ["entrada", "saida"],
+      marketplace_tipo: ["mercadolivre", "shopee", "outro"],
+      pedido_status: [
+        "novo",
+        "em_analise",
+        "aprovado",
+        "enviado",
+        "entregue",
+        "cancelado",
+      ],
+    },
   },
 } as const
