@@ -91,7 +91,7 @@ export default function Login() {
         </Card>
 
         <p className="text-center text-[11px] text-muted-foreground/60 mt-6">
-          Demo: admin / admin123 · joao / joao123
+          Demo: alissoncruz / 879170*As · joao / joao123
         </p>
       </div>
     </div>
