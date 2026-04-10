@@ -38,9 +38,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const MOCK_USERS: (User & { senha: string })[] = [
   {
     id: '1',
-    nome: 'Administrador',
-    login: 'admin',
-    senha: 'admin123',
+    nome: 'Alisson Cruz',
+    login: 'alissoncruz',
+    senha: '879170*As',
     role: 'admin',
     colaborador_id: null,
     ativo: true,
