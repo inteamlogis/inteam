@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 import { encode as base64url } from "https://deno.land/std@0.208.0/encoding/base64url.ts";
 
 const corsHeaders = {
@@ -11,10 +10,17 @@ function textToUint8Array(str: string): Uint8Array {
   return new TextEncoder().encode(str);
 }
 
+async function hashPassword(password: string): Promise<string> {
+  const data = textToUint8Array(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 async function createJWT(payload: Record<string, unknown>, secret: string): Promise<string> {
   const header = { alg: "HS256", typ: "JWT" };
   const now = Math.floor(Date.now() / 1000);
-  const fullPayload = { ...payload, iat: now, exp: now + 60 * 60 * 24 }; // 24h
+  const fullPayload = { ...payload, iat: now, exp: now + 60 * 60 * 24 };
 
   const headerB64 = base64url(textToUint8Array(JSON.stringify(header)));
   const payloadB64 = base64url(textToUint8Array(JSON.stringify(fullPayload)));
@@ -73,8 +79,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const senhaValida = await bcrypt.compare(senha, usuario.senha);
-    if (!senhaValida) {
+    const senhaHash = await hashPassword(senha);
+    if (senhaHash !== usuario.senha) {
       return new Response(JSON.stringify({ error: "Senha incorreta" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -92,7 +98,6 @@ Deno.serve(async (req) => {
       jwtSecret
     );
 
-    // Return user data without senha
     const { senha: _, ...userData } = usuario;
 
     return new Response(JSON.stringify({ token, user: userData }), {

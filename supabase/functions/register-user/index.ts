@@ -1,10 +1,20 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+function textToUint8Array(str: string): Uint8Array {
+  return new TextEncoder().encode(str);
+}
+
+async function hashPassword(password: string): Promise<string> {
+  const data = textToUint8Array(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -26,7 +36,6 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Check if login already exists
     const { data: existing } = await supabase
       .from("usuarios")
       .select("id")
@@ -40,7 +49,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const senhaHash = await bcrypt.hash(senha);
+    const senhaHash = await hashPassword(senha);
 
     const { data, error } = await supabase
       .from("usuarios")
