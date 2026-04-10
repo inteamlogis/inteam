@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
-  const [login, setLogin] = useState('');
+  const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login: doLogin, isLoading } = useAuth();
@@ -19,7 +19,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await doLogin(login, senha);
+      await doLogin(email, senha);
       navigate('/dashboard');
     } catch (err: any) {
       toast({ title: 'Erro ao entrar', description: err.message, variant: 'destructive' });
@@ -42,12 +42,13 @@ export default function Login() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="login" className="text-sm font-medium">Apelido / Login</Label>
+                <Label htmlFor="email" className="text-sm font-medium">E-mail</Label>
                 <Input
-                  id="login"
-                  value={login}
-                  onChange={(e) => setLogin(e.target.value)}
-                  placeholder="seu.apelido"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
                   required
                   className="h-10"
                 />
@@ -89,10 +90,6 @@ export default function Login() {
             </p>
           </CardContent>
         </Card>
-
-        <p className="text-center text-[11px] text-muted-foreground/60 mt-6">
-          Demo: alissoncruz / 879170*As · joao / joao123
-        </p>
       </div>
     </div>
   );
