@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export type UserRole = 'admin' | 'colaborador' | 'assistente';
 
@@ -17,7 +19,7 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   isAdmin: boolean;
@@ -34,83 +36,99 @@ interface RegisterData {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for development — will be replaced by Supabase queries
-const MOCK_USERS: (User & { senha: string })[] = [
-  {
-    id: '1',
-    nome: 'Alisson Cruz',
-    login: 'alissoncruz',
-    senha: '879170*As',
-    role: 'admin',
-    colaborador_id: null,
-    ativo: true,
-    whatsapp: '11999999999',
-    permissoes: null,
-    permite_criar_assistente: false,
-  },
-  {
-    id: '2',
-    nome: 'João Silva',
-    login: 'joao',
-    senha: 'joao123',
-    role: 'colaborador',
-    colaborador_id: null,
-    ativo: true,
-    whatsapp: '11988888888',
-    permissoes: null,
-    permite_criar_assistente: true,
-  },
-  {
-    id: '3',
-    nome: 'Maria Assistente',
-    login: 'maria',
-    senha: 'maria123',
-    role: 'assistente',
-    colaborador_id: '2',
-    ativo: true,
-    whatsapp: '11977777777',
-    permissoes: null,
-    permite_criar_assistente: false,
-  },
-];
+async function fetchProfile(userId: string): Promise<User | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    nome: data.nome,
+    login: data.login,
+    role: data.role as UserRole,
+    colaborador_id: data.colaborador_id,
+    ativo: data.ativo,
+    whatsapp: data.whatsapp,
+    permissoes: data.permissoes as Record<string, boolean> | null,
+    permite_criar_assistente: data.permite_criar_assistente,
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem('inteam_user');
-    return stored ? JSON.parse(stored) : null;
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = useCallback(async (username: string, password: string) => {
+  useEffect(() => {
+    // Listen for auth state changes first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (session?.user) {
+          // Use setTimeout to avoid potential deadlock with Supabase client
+          setTimeout(async () => {
+            const profile = await fetchProfile(session.user.id);
+            setUser(profile);
+            setIsLoading(false);
+          }, 0);
+        } else {
+          setUser(null);
+          setIsLoading(false);
+        }
+      }
+    );
+
+    // Then check for existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const profile = await fetchProfile(session.user.id);
+        setUser(profile);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Simulate API delay
-      await new Promise((r) => setTimeout(r, 600));
-      const found = MOCK_USERS.find((u) => u.login === username && u.senha === password);
-      if (!found) throw new Error('Credenciais inválidas');
-      if (!found.ativo) throw new Error('Conta aguardando aprovação da diretoria');
-      const { senha: _, ...userData } = found;
-      setUser(userData);
-      localStorage.setItem('inteam_user', JSON.stringify(userData));
-    } finally {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw new Error(error.message);
+    } catch (err) {
       setIsLoading(false);
+      throw err;
     }
   }, []);
 
   const register = useCallback(async (data: RegisterData) => {
     setIsLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 600));
-      // In production: insert into `usuarios` table with ativo=false
-      console.log('Registro enviado:', data);
+      const { error } = await supabase.auth.signUp({
+        email: `${data.login}@inteam.app`,
+        password: data.senha,
+        options: {
+          data: {
+            nome: data.nome,
+            login: data.login,
+            whatsapp: data.whatsapp,
+          },
+        },
+      });
+      if (error) throw new Error(error.message);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('inteam_user');
   }, []);
 
   return (

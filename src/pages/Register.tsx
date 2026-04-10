@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Register() {
-  const [form, setForm] = useState({ nome: '', login: '', whatsapp: '', senha: '', confirmar: '' });
+  const [form, setForm] = useState({ nome: '', login: '', whatsapp: '', email: '', senha: '', confirmar: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const { register, isLoading } = useAuth();
@@ -27,7 +27,7 @@ export default function Register() {
     }
     try {
       await register({ nome: form.nome, login: form.login, whatsapp: form.whatsapp, senha: form.senha });
-      toast({ title: 'Cadastro enviado!', description: 'Aguarde a aprovação da diretoria.' });
+      toast({ title: 'Cadastro enviado!', description: 'Verifique seu e-mail para confirmar a conta. Após confirmação, aguarde a aprovação da diretoria.' });
       navigate('/login');
     } catch (err: any) {
       toast({ title: 'Erro', description: err.message, variant: 'destructive' });
