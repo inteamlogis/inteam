@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 /* Design system tokens — all colors HSL */
+@layer base {
   :root {
     --background: 0 0% 99%;
     --foreground: 220 13% 18%;
